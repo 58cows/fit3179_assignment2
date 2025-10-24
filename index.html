@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Malaysia’s Income & Poverty — FIT3179 DV2</title>
+  <meta name="author" content="Aisha Zafar" />
+  <meta name="keywords" content="Malaysia, poverty, income, population, DOSM, geoBoundaries, Vega-Lite, data visualisation" />
+  <meta name="description" content="State-level view of Malaysia’s poverty, how states rank, how income relates, and how many people are affected." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./css/style.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="hero">
+      <h1>Malaysia’s Income & Poverty (2022)</h1>
+      <p class="sub">Latest state-level view of poverty, how states rank, how income relates, and how many people are affected.</p>
+      <div class="meta">
+        <span>Author: <strong>Aisha Zafar</strong></span>
+        <span>Updated: <span id="today"></span></span>
+      </div>
+    </header>
+
+    <!-- MAP -->
+    <section class="card">
+      <h2>Where is poverty highest?</h2>
+      <div id="vis-map" class="vis map"></div>
+
+      <div class="explain">
+        <h3 class="eyebrow">What this shows</h3>
+        <p>
+          A choropleth map of the <strong>poverty rate (%)</strong> by state. The map displays the <strong>latest</strong> available data per state.
+        </p>
+
+        <h3 class="eyebrow">How to read</h3>
+        <ul>
+          <li><strong>Darker blue</strong> &rarr; <strong>higher</strong> poverty rate. Lighter blue &rarr; lower rate.</li>
+          <li>White borders separate states; pale aqua ocean and thin graticules give geographic context.</li>
+          <li>Hover a state to see the exact percent and the year used.</li>
+        </ul>
+
+        <h3 class="eyebrow">Color scale</h3>
+        <p>Sequential <em>Blues</em> scale (light &rarr; dark), good for ordered data and color-blind friendly.</p>
+
+        <p class="caption">
+          Data: <code>hh_poverty_state.csv</code> (joined to Malaysia topology). Value = <code>poverty_absolute</code> (%).
+        </p>
+      </div>
+    </section>
+
+    <!-- RANKED BARS -->
+    <section class="card">
+      <h2>Poverty by State (ranked)</h2>
+      <div id="vis-bar" class="vis tall"></div>
+
+      <div class="explain">
+        <h3 class="eyebrow">What this shows</h3>
+        <p>
+          States ranked by their <strong>latest poverty rate (%)</strong>. The dashed rule marks the <strong>national average</strong>.
+        </p>
+
+        <h3 class="eyebrow">Axes & colors</h3>
+        <ul>
+          <li><strong>X-axis</strong>: poverty rate (%) with grid for easy reading.</li>
+          <li><strong>Y-axis</strong>: states, sorted highest &rarr; lowest.</li>
+          <li><strong>Color</strong>: states above average in deep purple; below average in soft gray.</li>
+        </ul>
+
+        <p class="caption">
+          Data: latest row per state from <code>hh_poverty_state.csv</code>; national average computed across states.
+        </p>
+      </div>
+    </section>
+
+    <!-- SCATTER -->
+    <section class="card">
+      <h2>Income vs. Poverty (bubble size = population)</h2>
+      <div id="vis-scatter" class="vis tall"></div>
+
+      <div class="explain">
+        <h3 class="eyebrow">What this shows</h3>
+        <p>
+          Each bubble is a state: <strong>x</strong> = median household income (RM), <strong>y</strong> = poverty rate (%),
+          <strong>size</strong> = population. Expect a <em>downward relation</em> (higher income, lower poverty). Large bubbles at high poverty indicate many people affected.
+        </p>
+
+        <h3 class="eyebrow">Axes & colors</h3>
+        <ul>
+          <li><strong>X-axis</strong>: <code>income_median</code> (RM)</li>
+          <li><strong>Y-axis</strong>: <code>poverty_absolute</code> (%)</li>
+          <li><strong>Size</strong>: <code>population</code> (larger = more people)</li>
+          <li><strong>Color</strong>: violet fill with a thin purple outline so bubbles stand out on the grid.</li>
+        </ul>
+
+        <p class="caption">
+          Data: latest income per state from <code>hh_income_state.csv</code>, joined to latest poverty and population.
+        </p>
+      </div>
+    </section>
+
+    <!-- LOLLIPOP -->
+    <section class="card">
+      <h2>Income Gap from National Median</h2>
+      <div id="vis-lollipop" class="vis tall"></div>
+
+      <div class="explain">
+        <h3 class="eyebrow">What this shows</h3>
+        <p>
+          How far each state’s <strong>median household income</strong> sits <strong>above or below</strong> the national median (RM).
+          Right of zero = above; left = below; line length = gap size.
+        </p>
+
+        <h3 class="eyebrow">Axes & colors</h3>
+        <ul>
+          <li><strong>X-axis</strong>: gap (RM) = <code>income_median − national_median</code>.</li>
+          <li><strong>Y-axis</strong>: states (sorted by gap).</li>
+          <li><strong>Color</strong>: green when the state is above the national median, red when below.</li>
+        </ul>
+
+        <p class="caption">
+          Data: latest income row per state from <code>hh_income_state.csv</code>.
+        </p>
+      </div>
+    </section>
+
+    <!-- STACKED 100% -->
+    <section class="card">
+      <h2>Population Exposure by Poverty Tier</h2>
+      <div id="vis-popshare" class="vis"></div>
+
+      <div class="explain">
+        <h3 class="eyebrow">What this shows</h3>
+        <p>
+          How Malaysia’s population is distributed across poverty <strong>tiers</strong> (Very Low → Very High), by state.
+          This highlights where many people live with higher poverty exposure.
+        </p>
+
+        <h3 class="eyebrow">Axes & colors</h3>
+        <ul>
+          <li><strong>X-axis</strong>: states.</li>
+          <li><strong>Y-axis</strong>: share of national population (stacked to 100%).</li>
+          <li><strong>Colors</strong> (severity): Very Low <span class="swatch" style="background:#d1fae5;"></span>,
+            Low <span class="swatch" style="background:#86efac;"></span>,
+            Moderate <span class="swatch" style="background:#fde68a;"></span>,
+            High <span class="swatch" style="background:#f59e0b;"></span>,
+            Very High <span class="swatch" style="background:#ef4444;"></span>.
+          </li>
+        </ul>
+
+        <p class="caption">
+          Data: latest population joined with each state’s latest poverty; tier derived from poverty %.
+        </p>
+      </div>
+    </section>
+
+    <!-- SOURCES -->
+    <section class="card">
+      <h2>Sources & Methods</h2>
+      <p>The visualisations use official Malaysian statistics and open boundary data. Geometry was simplified for web display.</p>
+      <ul class="sources">
+        <li>
+          <strong>Population by State</strong> — DOSM OpenDOSM:
+          <a href="https://open.dosm.gov.my/data-catalogue/population_state" target="_blank" rel="noopener">open.dosm.gov.my/data-catalogue/population_state</a>
+        </li>
+        <li>
+          <strong>Household Poverty by State</strong> — DOSM OpenDOSM:
+          <a href="https://open.dosm.gov.my/data-catalogue/hh_poverty_state" target="_blank" rel="noopener">open.dosm.gov.my/data-catalogue/hh_poverty_state</a>
+        </li>
+        <li>
+          <strong>Household Income by State</strong> — DOSM OpenDOSM:
+          <a href="https://open.dosm.gov.my/data-catalogue/hh_income_state" target="_blank" rel="noopener">open.dosm.gov.my/data-catalogue/hh_income_state</a>
+        </li>
+        <li>
+          <strong>Administrative Boundaries</strong> — geoBoundaries (Malaysia, ADM1):
+          <a href="https://data.humdata.org/dataset/geoboundaries-admin-boundaries-for-malaysia/resource/55b3dd6f-5786-4dce-b32f-5eca9bc8c16d" target="_blank" rel="noopener">HDX: geoBoundaries Malaysia</a>
+          <br/><small>License: CC BY 4.0 (check dataset page for any updates).</small>
+        </li>
+        <li>
+          <strong>Geometry processing</strong> — simplified/topojson via:
+          <a href="https://mapshaper.org/" target="_blank" rel="noopener">mapshaper.org</a>
+          <br/><small>Commands used: <code>simplify</code>, <code>clean</code>, export to TopoJSON.</small>
+        </li>
+      </ul>
+    </section>
+
+    <footer class="footer">
+      <p>Data: Household poverty, income & population; Malaysia boundaries; Natural Earth ocean & graticules. Built with Vega-Lite.</p>
+      <p>Sources: DOSM OpenDOSM, geoBoundaries (ADM1), processing via mapshaper.</p>
+    </footer>
+  </main>
+
+  <!-- libs -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.26.1"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.17.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.25.0"></script>
+  <script src="./js/main.js"></script>
+</body>
+</html>
