@@ -1,0 +1,33 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 420,
+  "data": { "url": "../data/population_state.csv" },
+  "transform": [
+    { "filter": "datum.sex == 'both' && datum.age == 'overall'" },
+    { "joinaggregate": [{ "op": "max", "field": "date", "as": "max_date" }], "groupby": ["state"] },
+    { "filter": "datum.date == datum.max_date" },
+    {
+      "lookup": "state",
+      "from": { "data": { "url": "../data/hh_poverty_state.csv" }, "key": "state", "fields": ["state", "date", "poverty_absolute"] }
+    },
+    { "joinaggregate": [{ "op": "max", "field": "date_1", "as": "max_pov_date" }], "groupby": ["state"] },
+    { "filter": "datum.date_1 == datum.max_pov_date" },
+    {
+      "calculate": "datum.poverty_absolute <= 5 ? 'Very Low' : datum.poverty_absolute <= 10 ? 'Low' : datum.poverty_absolute <= 15 ? 'Moderate' : datum.poverty_absolute <= 25 ? 'High' : 'Very High'",
+      "as": "poverty_tier"
+    }
+  ],
+  "mark": { "type": "bar" },
+  "encoding": {
+    "x": { "field": "state", "type": "nominal", "axis": { "labelAngle": -40 }, "title": null },
+    "y": { "aggregate": "sum", "field": "population", "stack": "normalize", "title": "Share of national population" },
+    "color": { "field": "poverty_tier", "type": "nominal", "title": "Poverty tier" },
+    "tooltip": [
+      { "field": "state" },
+      { "field": "poverty_tier", "title": "Tier" },
+      { "aggregate": "sum", "field": "population", "title": "Population (k)" }
+    ]
+  }
+}
+

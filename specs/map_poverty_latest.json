@@ -1,0 +1,66 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Map of Malaysia state poverty rate (latest). Sources: DOSM OpenDOSM hh_poverty_state; geoBoundaries ADM1; oceans/graticules from Natural Earth; topology simplified via mapshaper.",
+  "usermeta": {
+    "sources": [
+      "https://open.dosm.gov.my/data-catalogue/hh_poverty_state",
+      "https://data.humdata.org/dataset/geoboundaries-admin-boundaries-for-malaysia",
+      "https://mapshaper.org/"
+    ]
+  },
+  "width": "container",
+  "height": 470,
+  "config": { "view": { "stroke": null } },
+  "projection": { "type": "mercator", "center": [110, 3.5], "scale": 1720 },
+  "layer": [
+    {
+      "data": {
+        "url": "../data/ne_110m_ocean.json",
+        "format": { "type": "topojson", "feature": "ne_110m_ocean" }
+      },
+      "mark": { "type": "geoshape", "fill": "#EFFFFC", "stroke": "#d0d7e2", "strokeWidth": 0.5 }
+    },
+    {
+      "data": {
+        "url": "../data/ne_110m_graticules_5.json",
+        "format": { "type": "topojson", "feature": "ne_110m_graticules_5" }
+      },
+      "mark": { "type": "geoshape", "fillOpacity": 0, "stroke": "#9efff4", "strokeWidth": 0.5 }
+    },
+    {
+      "data": {
+        "url": "../data/malaysia_map.json",
+        "format": { "type": "topojson", "feature": "my" }
+      },
+      "transform": [
+        {
+          "lookup": "properties.name",
+          "from": {
+            "data": { "url": "../data/hh_poverty_state.csv" },
+            "key": "state",
+            "fields": ["state", "date", "poverty_absolute"]
+          }
+        },
+        { "joinaggregate": [{ "op": "max", "field": "date", "as": "max_date" }], "groupby": ["state"] },
+        { "filter": "datum.date == datum.max_date" },
+        { "calculate": "datum.state", "as": "state" },
+        { "calculate": "toString(datum.date)", "as": "year_str" }
+      ],
+      "mark": { "type": "geoshape", "stroke": "#ffffff", "strokeWidth": 0.8 },
+      "encoding": {
+        "color": {
+          "field": "poverty_absolute",
+          "type": "quantitative",
+          "title": "Poverty rate (%)",
+          "scale": { "scheme": "blues" },
+          "legend": { "orient": "bottom", "direction": "horizontal", "title": "Poverty rate (%)" }
+        },
+        "tooltip": [
+          { "field": "state", "title": "State" },
+          { "field": "poverty_absolute", "title": "Poverty (%)", "format": ".1f" },
+          { "field": "year_str", "title": "Year" }
+        ]
+      }
+    }
+  ]
+}

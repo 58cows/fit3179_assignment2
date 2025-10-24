@@ -1,0 +1,63 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "width": "container",
+  "height": 520,
+  "data": { "url": "../data/hh_income_state.csv" },
+
+  "transform": [
+    { "joinaggregate": [{ "op": "max", "field": "date", "as": "max_date" }], "groupby": ["state"] },
+    { "filter": "datum.date == datum.max_date" },
+
+    { "joinaggregate": [{ "op": "median", "field": "income_median", "as": "nat_med" }] },
+    { "calculate": "datum.income_median - datum.nat_med", "as": "gap" },
+    { "filter": "isValid(datum.gap)" }
+  ],
+
+  "layer": [
+    {
+      "mark": { "type": "rule" },
+      "encoding": {
+        "y": {
+          "field": "state",
+          "type": "nominal",
+          "sort": { "field": "gap", "order": "descending" },
+          "title": null
+        },
+        "x": { "field": "gap", "type": "quantitative", "title": null },
+        "x2": { "value": 0 }
+      }
+    },
+    {
+      "mark": { "type": "circle", "size": 90 },
+      "encoding": {
+        "y": {
+          "field": "state",
+          "type": "nominal",
+          "sort": { "field": "gap", "order": "descending" },
+          "title": null
+        },
+        "x": {
+          "field": "gap",
+          "type": "quantitative",
+          "title": "Gap from national median (RM)",
+          "axis": { "tickCount": 6, "grid": true }
+        },
+        "color": {
+          "condition": { "test": "datum.gap >= 0", "value": "#16a34a" },
+          "value": "#dc2626"
+        },
+        "tooltip": [
+          { "field": "state", "title": "State" },
+          { "field": "income_median", "title": "Median income (RM)" },
+          { "field": "nat_med", "title": "National median (RM)" },
+          { "field": "gap", "title": "Gap (RM)" },
+          { "field": "date", "title": "Income year" }
+        ]
+      }
+    },
+    {
+      "mark": { "type": "rule", "strokeDash": [4, 4] },
+      "encoding": { "x": { "value": 0 } }
+    }
+  ]
+}

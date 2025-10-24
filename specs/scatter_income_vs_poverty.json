@@ -1,0 +1,60 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Median household income vs poverty rate; bubble size = population (latest per state).",
+  "usermeta": {
+    "sources": [
+      "https://open.dosm.gov.my/data-catalogue/hh_income_state",
+      "https://open.dosm.gov.my/data-catalogue/hh_poverty_state",
+      "https://open.dosm.gov.my/data-catalogue/population_state"
+    ]
+  },
+  "width": "container",
+  "height": 520,
+  "data": { "url": "../data/hh_income_state.csv" },
+  "transform": [
+    { "joinaggregate": [{ "op": "max", "field": "date", "as": "max_income_date" }], "groupby": ["state"] },
+    { "filter": "datum.date == datum.max_income_date" },
+    {
+      "lookup": "state",
+      "from": { "data": { "url": "../data/hh_poverty_state.csv" }, "key": "state", "fields": ["date", "poverty_absolute"] },
+      "as": ["pov_date", "poverty_absolute"]
+    },
+    {
+      "lookup": "state",
+      "from": { "data": { "url": "../data/population_state.csv" }, "key": "state", "fields": ["population"] },
+      "as": ["population"]
+    },
+    { "filter": "isValid(datum.poverty_absolute) && isValid(datum.population) && isValid(datum.income_median)" }
+  ],
+  "mark": { "type": "circle", "opacity": 0.8, "stroke": "#4f46e5", "strokeWidth": 1 },
+  "encoding": {
+    "x": {
+      "field": "income_median",
+      "type": "quantitative",
+      "title": "Median household income (RM)",
+      "axis": { "tickCount": 6, "grid": true }
+    },
+    "y": {
+      "field": "poverty_absolute",
+      "type": "quantitative",
+      "title": "Poverty rate (%)",
+      "axis": { "tickCount": 6, "grid": true }
+    },
+    "size": {
+      "field": "population",
+      "type": "quantitative",
+      "title": "Population",
+      "scale": { "range": [80, 1800] }
+    },
+    "color": { "value": "#7c8cf8" },
+    "tooltip": [
+      { "field": "state", "title": "State" },
+      { "field": "income_median", "title": "Median income (RM)", "format": ",.0f" },
+      { "field": "poverty_absolute", "title": "Poverty (%)", "format": ".1f" },
+      { "field": "population", "title": "Population", "format": ",.0f" },
+      { "field": "pov_date", "title": "Poverty year", "type": "nominal" },
+      { "field": "date", "title": "Income year", "type": "nominal" }
+    ]
+  }
+}
+

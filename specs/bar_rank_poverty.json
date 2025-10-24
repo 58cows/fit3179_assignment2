@@ -1,0 +1,51 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+  "description": "Ranked latest poverty rate by state with national average rule.",
+  "usermeta": {
+    "sources": [
+      "https://open.dosm.gov.my/data-catalogue/hh_poverty_state"
+    ]
+  },
+  "height": 520,
+  "width": "container",
+  "data": { "url": "../data/hh_poverty_state.csv" },
+  "transform": [
+    { "joinaggregate": [{ "op": "max", "field": "date", "as": "max_date" }], "groupby": ["state"] },
+    { "filter": "datum.date == datum.max_date" },
+    { "joinaggregate": [{ "op": "mean", "field": "poverty_absolute", "as": "national_avg" }] }
+  ],
+  "layer": [
+    {
+      "mark": { "type": "bar", "cornerRadiusEnd": 3 },
+      "encoding": {
+        "y": {
+          "field": "state",
+          "type": "nominal",
+          "sort": { "field": "poverty_absolute", "order": "descending" },
+          "title": null
+        },
+        "x": {
+          "field": "poverty_absolute",
+          "type": "quantitative",
+          "title": "Poverty rate (%)",
+          "axis": { "grid": true, "tickCount": 6 }
+        },
+        "color": {
+          "condition": [
+            { "test": "datum.poverty_absolute >= datum.national_avg", "value": "#4f46e5" }
+          ],
+          "value": "#cbd5e1"
+        },
+        "tooltip": [
+          { "field": "state", "title": "State" },
+          { "field": "poverty_absolute", "title": "Latest poverty (%)", "format": ".1f" },
+          { "field": "national_avg", "title": "National avg (%)", "format": ".1f" }
+        ]
+      }
+    },
+    {
+      "mark": { "type": "rule", "strokeDash": [4, 4], "color": "#475569" },
+      "encoding": { "x": { "field": "national_avg", "type": "quantitative", "title": null } }
+    }
+  ]
+}
